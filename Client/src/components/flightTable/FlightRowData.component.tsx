@@ -16,13 +16,16 @@ const FlightRowData: React.FC<FlightRowDataProps> = ({
   onDelete,
   isDeleting,
 }) => {
+  const formattedDepartureTime = format(
+    new Date(flight.departureTime),
+    "MMM dd, yyyy HH:mm"
+  );
+
   return (
-    <TableRow key={flight.id}>
+    <TableRow>
       <TableCell>{flight.flightNumber}</TableCell>
       <TableCell>{flight.destination}</TableCell>
-      <TableCell>
-        {format(new Date(flight.departureTime), "MMM dd, yyyy HH:mm")}
-      </TableCell>
+      <TableCell>{formattedDepartureTime}</TableCell>
       <TableCell>{flight.gate}</TableCell>
       <TableCell>
         <StatusBadge status={flight.status} />

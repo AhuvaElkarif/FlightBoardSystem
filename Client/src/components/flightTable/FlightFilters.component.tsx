@@ -1,37 +1,27 @@
-import React from 'react';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { setStatusFilter, setDestinationFilter, clearFilters } from '../../store/slices/filtersSlice';
-import { FlightStatus } from '../../types/types';
-import { Button } from '../ui/button/Button.component';
-import { Input, Select } from '../ui/Input.styled';
-import { Card, CardHeader, CardContent } from '../ui/Card.styled';
-import { FilterField, FilterGrid, Label } from './FlightTable.styled';
+import { FlightStatus } from "../../types/types";
+import { Button } from "../ui/button/Button.component";
+import { Input, Select } from "../ui/Input.styled";
+import { Card, CardHeader, CardContent } from "../ui/Card.styled";
+import { FilterField, FilterGrid, Label } from "./FlightTable.styled";
+import { useFlightFilters } from "../../hooks/useFlightFilters";
 
 interface FlightFiltersProps {
-  onSearch: () => void;
   isSearching?: boolean;
 }
 
-export const FlightFilters: React.FC<FlightFiltersProps> = ({ onSearch, isSearching }) => {
-  const dispatch = useAppDispatch();
-  const { filters } = useAppSelector(state => state.filters);
-
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value || undefined;
-    dispatch(setStatusFilter(value));
-  };
-
-  const handleDestinationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value || undefined;
-    dispatch(setDestinationFilter(value));
-  };
-
-  const handleClearFilters = () => {
-    dispatch(clearFilters());
-  };
+export const FlightFiltersCard: React.FC<FlightFiltersProps> = ({
+  isSearching,
+}) => {
+  const {
+    localFilters,
+    handleStatusChange,
+    handleDestinationChange,
+    handleClearFilters,
+    handleSearch,
+  } = useFlightFilters();
 
   return (
-    <Card width='70vw'>
+    <Card width="70vw">
       <CardHeader>
         <h2>Filter Flights</h2>
       </CardHeader>
@@ -41,11 +31,12 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ onSearch, isSearch
             <Label htmlFor="statusFilter">Status</Label>
             <Select
               id="statusFilter"
-              value={filters.status || ''}
+              value={localFilters.status || ""}
               onChange={handleStatusChange}
+              disabled={isSearching}
             >
               <option value="">All Statuses</option>
-              {Object.values(FlightStatus).map(status => (
+              {Object.values(FlightStatus).map((status) => (
                 <option key={status} value={status}>
                   {status}
                 </option>
@@ -57,13 +48,17 @@ export const FlightFilters: React.FC<FlightFiltersProps> = ({ onSearch, isSearch
             <Label htmlFor="destinationFilter">Destination</Label>
             <Input
               id="destinationFilter"
-              value={filters.destination || ''}
               onChange={handleDestinationChange}
               placeholder="Filter by destination"
+              disabled={isSearching}
             />
           </FilterField>
 
-          <Button variant="primary" onClick={onSearch} loading={isSearching}>
+          <Button
+            variant="primary"
+            onClick={handleSearch}
+            loading={isSearching}
+          >
             Search
           </Button>
 

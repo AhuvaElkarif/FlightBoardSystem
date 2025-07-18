@@ -24,7 +24,7 @@ export const FlightTable: React.FC<FlightTableProps> = ({
   flights,
   deleteFlight,
   isDeleting,
-  deleteError
+  deleteError,
 }) => {
   const onDeleteFlight = useCallback(
     async (id: string) => {
@@ -53,10 +53,10 @@ export const FlightTable: React.FC<FlightTableProps> = ({
   return (
     <>
       {deleteError && (
-            <ErrorMessageBoard>
-              Error deleting flight: {deleteError.message}
-            </ErrorMessageBoard>
-          )}
+        <ErrorMessageBoard>
+          Error deleting flight: {deleteError.message}
+        </ErrorMessageBoard>
+      )}
       <Table>
         <TableHeader>
           <TableRow>
@@ -68,6 +68,7 @@ export const FlightTable: React.FC<FlightTableProps> = ({
         <TableBody>
           {flights.map((flight) => (
             <FlightRowData
+              key={flight.id}
               flight={flight}
               onDelete={onDeleteFlight}
               isDeleting={isDeleting}

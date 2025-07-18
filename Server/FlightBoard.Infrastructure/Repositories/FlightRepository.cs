@@ -47,12 +47,11 @@ namespace FlightBoard.Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(destination))
             {
-                query = query.Where(f => f.Destination.Contains(destination));
+                query = query.Where(f => f.Destination.ToLower().Contains(destination.ToLower().Trim()));
             }
 
             var flights = await query.OrderBy(f => f.DepartureTime).ToListAsync();
 
-            // Filter by status if provided (done in-memory since status is calculated)
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<FlightStatus>(status, true, out var statusEnum))
             {
                 var currentTime = DateTime.Now;

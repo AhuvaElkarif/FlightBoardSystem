@@ -5,7 +5,7 @@ import {
   ErrorMessageBoard,
   Section,
 } from "../flightsBoard/FlightsBoard.styled";
-import { FlightFilters } from "./FlightFilters.component";
+import { FlightFiltersCard } from "./FlightFilters.component";
 import { FlightTable } from "./FlightTable.component";
 
 export const FlightData: React.FC = () => {
@@ -13,16 +13,12 @@ export const FlightData: React.FC = () => {
   const { flights, isLoading, error, deleteFlight, isDeleting, deleteError } =
     useFlights(filters);
 
-  const handleSearch = () => {
-    // The search is handled automatically by the useFlights hook
-    // when filters change due to the query key dependency
-  };
-
   return (
     <Container>
       <DataTitle>Flight Management</DataTitle>
+
       <Section>
-        <FlightFilters onSearch={handleSearch} isSearching={isLoading} />
+        <FlightFiltersCard isSearching={isLoading} />
       </Section>
 
       <Section>
