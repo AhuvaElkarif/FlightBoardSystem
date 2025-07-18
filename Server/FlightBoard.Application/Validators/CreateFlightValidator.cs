@@ -33,7 +33,7 @@ namespace FlightBoard.Application.Validators
                 .WithMessage("Gate must be between 1 and 10 characters");
 
             RuleFor(x => x.DepartureTime)
-                .GreaterThan(DateTime.UtcNow)
+                .GreaterThan(DateTime.Now)
                 .WithMessage("Departure time must be in the future");
         }
 

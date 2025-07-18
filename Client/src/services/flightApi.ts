@@ -41,7 +41,7 @@ export const flightApi = {
       if (filters.status) params.status = filters.status;
       if (filters.destination) params.destination = filters.destination;
 
-      const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.FLIGHTS}/search`, { params });
+      const response = await axios.get(`${API_BASE_URL}${API_ENDPOINTS.SEARCH_FLIGHTS}`, { params });
       return response.data;
     } catch (error) {
       throw new Error('Failed to search flights');

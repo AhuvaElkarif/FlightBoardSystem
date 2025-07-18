@@ -33,30 +33,30 @@ namespace FlightBoard.Infrastructure.Data
                     Id = 1,
                     FlightNumber = "AA101",
                     Destination = "New York",
-                    DepartureTime = DateTime.UtcNow.AddHours(2),
+                    DepartureTime = DateTime.Now.AddHours(2),
                     Gate = "A1",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 },
                 new Flight
                 {
                     Id = 2,
                     FlightNumber = "BA202",
                     Destination = "London",
-                    DepartureTime = DateTime.UtcNow.AddMinutes(15),
+                    DepartureTime = DateTime.Now.AddMinutes(15),
                     Gate = "B2",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 },
                 new Flight
                 {
                     Id = 3,
                     FlightNumber = "DL303",
                     Destination = "Paris",
-                    DepartureTime = DateTime.UtcNow.AddMinutes(-30),
+                    DepartureTime = DateTime.Now.AddMinutes(-30),
                     Gate = "C3",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 }
             );
         }

@@ -60,8 +60,8 @@ namespace FlightBoard.Application.Services
                 Destination = createFlightDto.Destination,
                 DepartureTime = createFlightDto.DepartureTime,
                 Gate = createFlightDto.Gate,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
 
             var savedFlight = await _flightRepository.AddAsync(flight);

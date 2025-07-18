@@ -2,14 +2,14 @@ import React, { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { Card, CardContent, CardHeader } from "../ui/Card.styled";
 import { Button } from "../ui/button/Button.component";
-import { FormContainer, FormFlex } from "./FlightForm.styled";
+import { FormContainer, FormFlex } from "./CreateFlight.styled";
 import { formFields } from "./utils";
 import FormField from "./FormField.component";
 import { useFlights } from "../../hooks/useFlights";
 import type { CreateFlightRequest } from "../../types/types";
 import Swal from "sweetalert2";
 
-export const FlightForm: React.FC = () => {
+export const CreateFlight: React.FC = () => {
   const {
     register,
     handleSubmit,

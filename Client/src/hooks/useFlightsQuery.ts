@@ -1,13 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
-import { flightApi } from '../services/flightApi';
-import type { FlightFilters } from '../types/types';
-import { QUERY_KEYS } from '../utils/constants';
-
-interface FlightError {
-  message: string;
-  code?: string;
-  details?: any;
-}
+import { useQuery } from "@tanstack/react-query";
+import { flightApi } from "../services/flightApi";
+import type { FlightFilters } from "../types/types";
+import { QUERY_KEYS } from "../utils/constants";
 
 export const useFlightsQuery = (filters?: FlightFilters) => {
   const getFlightQueryKeys = (filters?: FlightFilters) => {
@@ -24,30 +18,16 @@ export const useFlightsQuery = (filters?: FlightFilters) => {
         }
         return await flightApi.getFlights();
       } catch (error) {
-        const flightError: FlightError = {
-          message: error instanceof Error ? error.message : 'Failed to fetch flights',
-          code: (error as any)?.code,
-          details: error
-        };
-        throw flightError;
+        console.error(error);
       }
     },
-    staleTime: 30000,
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if ((error as any)?.status >= 400 && (error as any)?.status < 500) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   return {
     flights: flightsQuery.data || [],
     isLoading: flightsQuery.isLoading,
     isFetching: flightsQuery.isFetching,
-    error: flightsQuery.error as FlightError | null,
+    error: flightsQuery.error,
     isError: flightsQuery.isError,
     refetch: flightsQuery.refetch,
   };

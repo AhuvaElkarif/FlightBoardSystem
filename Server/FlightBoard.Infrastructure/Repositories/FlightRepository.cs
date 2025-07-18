@@ -55,7 +55,7 @@ namespace FlightBoard.Infrastructure.Repositories
             // Filter by status if provided (done in-memory since status is calculated)
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<FlightStatus>(status, true, out var statusEnum))
             {
-                var currentTime = DateTime.UtcNow;
+                var currentTime = DateTime.Now;
                 flights = flights.Where(f => CalculateFlightStatus(f.DepartureTime, currentTime) == statusEnum).ToList();
             }
 
@@ -66,8 +66,8 @@ namespace FlightBoard.Infrastructure.Repositories
         {
             _logger.LogDebug("Adding new flight: {FlightNumber}", flight.FlightNumber);
 
-            flight.CreatedAt = DateTime.UtcNow;
-            flight.UpdatedAt = DateTime.UtcNow;
+            flight.CreatedAt = DateTime.Now;
+            flight.UpdatedAt = DateTime.Now;
 
             _context.Flights.Add(flight);
             await _context.SaveChangesAsync();

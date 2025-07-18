@@ -7,7 +7,7 @@ namespace FlightBoard.Application.Services
     {
         public FlightStatus CalculateStatus(DateTime departureTime)
         {
-            return CalculateStatus(departureTime, DateTime.UtcNow);
+            return CalculateStatus(departureTime, DateTime.Now);
         }
 
         public FlightStatus CalculateStatus(DateTime departureTime, DateTime currentTime)
