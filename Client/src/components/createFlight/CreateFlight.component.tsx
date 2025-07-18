@@ -5,7 +5,7 @@ import { Button } from "../ui/button/Button.component";
 import { FormContainer, FormFlex } from "./CreateFlight.styled";
 import { formFields } from "./utils";
 import FormField from "./FormField.component";
-import { useFlights } from "../../hooks/useFlights";
+import { useFlights } from "../../hooks/api/flights/useFlights";
 import type { CreateFlightRequest } from "../../types/types";
 import Swal from "sweetalert2";
 

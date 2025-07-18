@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useAppDispatch } from '../store';
-import { clearFilters, setFilters } from '../store/slices/filtersSlice';
-import { FlightStatus, type FlightFilters } from '../types/types';
+import { useAppDispatch } from '../../store';
+import { clearFilters, setFilters } from '../../store/slices/filtersSlice';
+import { FlightStatus, type FlightFilters } from '../../types/types';
 
 export const useFlightFilters = () => {
   const dispatch = useAppDispatch();

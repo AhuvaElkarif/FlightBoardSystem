@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { flightApi } from "../services/flightApi";
-import type { FlightFilters } from "../types/types";
-import { QUERY_KEYS } from "../utils/constants";
+import { flightApi } from "../../../services/flightApi";
+import type { FlightFilters } from "../../../types/types";
+import { QUERY_KEYS } from "../../../utils/constants";
 
 export const useFlightsQuery = (filters?: FlightFilters) => {
   const getFlightQueryKeys = (filters?: FlightFilters) => {

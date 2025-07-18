@@ -3,7 +3,7 @@ import { Button } from "../ui/button/Button.component";
 import { Input, Select } from "../ui/Input.styled";
 import { Card, CardHeader, CardContent } from "../ui/Card.styled";
 import { FilterField, FilterGrid, Label } from "./FlightTable.styled";
-import { useFlightFilters } from "../../hooks/useFlightFilters";
+import { useFlightFilters } from "../../hooks/ui/useFlightFilters";
 
 interface FlightFiltersProps {
   isSearching?: boolean;

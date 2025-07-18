@@ -1,4 +1,4 @@
-import type { FlightFilters } from "../types/types";
+import type { FlightFilters } from "../../../types/types";
 import { useCreateFlight } from "./useCreateFlight";
 import { useDeleteFlight } from "./useDeleteQuery";
 import { useFlightsQuery } from "./useFlightsQuery";

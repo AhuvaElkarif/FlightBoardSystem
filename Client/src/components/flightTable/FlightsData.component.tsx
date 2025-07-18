@@ -1,6 +1,6 @@
 import { Container, DataTitle } from "./FlightTable.styled";
 import { useAppSelector } from "../../store";
-import { useFlights } from "../../hooks/useFlights";
+import { useFlights } from "../../hooks/api/flights/useFlights";
 import {
   ErrorMessageBoard,
   Section,
