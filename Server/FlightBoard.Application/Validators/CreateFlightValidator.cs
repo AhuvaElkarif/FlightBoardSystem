@@ -23,8 +23,8 @@ namespace FlightBoard.Application.Validators
             RuleFor(x => x.Destination)
                 .NotEmpty()
                 .WithMessage("Destination is required")
-                .Length(2, 100)
-                .WithMessage("Destination must be between 2 and 100 characters");
+                .Length(1, 100)
+                .WithMessage("Destination must be between 1 and 100 characters");
 
             RuleFor(x => x.Gate)
                 .NotEmpty()

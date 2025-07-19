@@ -10,7 +10,7 @@ import { FlightTable } from "./FlightTable.component";
 
 export const FlightData: React.FC = () => {
   const { filters } = useAppSelector((state) => state.filters);
-  const { flights, isLoading, error, deleteFlight, isDeleting, deleteError } =
+  const { flights, isLoading, error, deleteFlightAsync, isDeleting } =
     useFlights(filters);
 
   return (
@@ -28,9 +28,8 @@ export const FlightData: React.FC = () => {
           </ErrorMessageBoard>
         ) : (
           <FlightTable
-            deleteError={deleteError}
             flights={flights}
-            deleteFlight={deleteFlight}
+            deleteFlight={deleteFlightAsync}
             isDeleting={isDeleting}
           />
         )}

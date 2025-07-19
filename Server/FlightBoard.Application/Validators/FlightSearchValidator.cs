@@ -14,8 +14,8 @@ namespace FlightBoard.Application.Validators
                 .When(x => !string.IsNullOrEmpty(x.Status));
 
             RuleFor(x => x.Destination)
-                .Length(2, 100)
-                .WithMessage("Destination must be between 2 and 100 characters")
+                .Length(1, 100)
+                .WithMessage("Destination must be between 1 and 100 characters")
                 .When(x => !string.IsNullOrEmpty(x.Destination));
         }
 

@@ -1,7 +1,7 @@
 import { FlightStatus } from "../../types/types";
-import { Button } from "../ui/button/Button.component";
-import { Input, Select } from "../ui/Input.styled";
-import { Card, CardHeader, CardContent } from "../ui/Card.styled";
+import { Button } from "../ui/forms/button/Button.component";
+import { Input, Select } from "../ui/forms/Input.styled";
+import { Card, CardHeader, CardContent } from "../ui/layout/Card.styled";
 import { FilterField, FilterGrid, Label } from "./FlightTable.styled";
 import { useFlightFilters } from "../../hooks/ui/useFlightFilters";
 

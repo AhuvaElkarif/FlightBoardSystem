@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { flightApi } from '../services/flightApi';
-import type { CreateFlightRequest, Flight } from '../types/types';
-import { QUERY_KEYS } from '../utils/constants';
-import { addFlightToCache } from '../utils/cacheUtils';
+import { flightApi } from '../../../services/flightApi';
+import type { CreateFlightRequest } from '../../../types/types';
+import { QUERY_KEYS } from '../../../utils/constants';
+import { addFlightToCache } from '../../../utils/cacheUtils';
 
 export const useCreateFlight = () => {
   const queryClient = useQueryClient();

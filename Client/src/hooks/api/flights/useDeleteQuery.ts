@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { flightApi } from "../services/flightApi";
-import type { Flight } from "../types/types";
-import { QUERY_KEYS } from "../utils/constants";
-import { removeFlightFromCache } from "../utils/cacheUtils";
+import { flightApi } from "../../../services/flightApi";
+import type { Flight } from "../../../types/types";
+import { QUERY_KEYS } from "../../../utils/constants";
+import { removeFlightFromCache } from "../../../utils/cacheUtils";
 
 export const useDeleteFlight = () => {
   const queryClient = useQueryClient();

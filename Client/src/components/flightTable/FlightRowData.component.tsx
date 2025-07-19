@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { TableCell, TableRow } from "../ui/Table.styled";
+import { TableCell, TableRow } from "../ui/layout/Table.styled";
 import { StatusBadge } from "../common/StatusBadge.component";
 import { DeleteButton } from "./FlightTable.styled";
 import { Trash2 } from "lucide-react";

@@ -6,7 +6,8 @@ import { QUERY_KEYS } from "../../../utils/constants";
 export const useFlightsQuery = (filters?: FlightFilters) => {
   const getFlightQueryKeys = (filters?: FlightFilters) => {
     const baseKey = [QUERY_KEYS.FLIGHTS];
-    return filters ? [...baseKey, filters] : baseKey;
+    const hasFilters = filters && (filters.status || filters.destination);
+    return hasFilters ? [...baseKey, filters] : baseKey;
   };
 
   const flightsQuery = useQuery({

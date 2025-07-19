@@ -5,41 +5,41 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/Table.styled";
+} from "../ui/layout/Table.styled";
 import type { Flight } from "../../types/types";
 import { EmptyState } from "./FlightTable.styled";
 import FlightRowData from "./FlightRowData.component";
 import { TABLE_HEADERS } from "../../utils/constants";
-import Swal from "sweetalert2";
-import { ErrorMessageBoard } from "../flightsBoard/FlightsBoard.styled";
+import { useToast } from "../../hooks/ui/useToast";
 
 interface FlightTableProps {
   flights: Flight[];
-  deleteFlight: (id: string) => void;
+  deleteFlight: (id: string) => Promise<string>;
   isDeleting?: boolean;
-  deleteError: Error | null;
 }
 
 export const FlightTable: React.FC<FlightTableProps> = ({
   flights,
   deleteFlight,
   isDeleting,
-  deleteError,
 }) => {
+  const { showPromise } = useToast();
   const onDeleteFlight = useCallback(
     async (id: string) => {
-      try {
-        await deleteFlight(id);
-        Swal.fire({
-          title: "Flight Deleted Successfully!",
-          icon: "success",
-          draggable: true,
-        });
-      } catch (err) {
-        console.error("Failed to delete flight:", err);
+      const confirmed = window.confirm(
+        "Are you sure you want to delete this flight?"
+      );
+
+      if (!confirmed) {
+        return;
       }
+      showPromise(deleteFlight(id), {
+        loading: "Deleting flight...",
+        success: "Flight deleted successfully!",
+        error: "Failed to delete flight",
+      });
     },
-    [deleteFlight]
+    [deleteFlight, showPromise]
   );
   if (flights.length === 0) {
     return (
@@ -51,31 +51,24 @@ export const FlightTable: React.FC<FlightTableProps> = ({
   }
 
   return (
-    <>
-      {deleteError && (
-        <ErrorMessageBoard>
-          Error deleting flight: {deleteError.message}
-        </ErrorMessageBoard>
-      )}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {TABLE_HEADERS.map((title, index) => (
-              <TableHead key={index}>{title}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {flights.map((flight) => (
-            <FlightRowData
-              key={flight.id}
-              flight={flight}
-              onDelete={onDeleteFlight}
-              isDeleting={isDeleting}
-            />
+    <Table>
+      <TableHeader>
+        <TableRow>
+          {TABLE_HEADERS.map((title, index) => (
+            <TableHead key={index}>{title}</TableHead>
           ))}
-        </TableBody>
-      </Table>
-    </>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {flights.map((flight) => (
+          <FlightRowData
+            key={flight.id}
+            flight={flight}
+            onDelete={onDeleteFlight}
+            isDeleting={isDeleting}
+          />
+        ))}
+      </TableBody>
+    </Table>
   );
 };

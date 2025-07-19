@@ -1,57 +1,73 @@
-import { useState, useCallback } from 'react';
-import Toast  from '../components/ui/toast/Toast.component';
-import type { ToastProps, ToastType } from '../components/ui/toast/Toast.component';
-
-export interface ToastItem {
-  id: string;
-  message: string;
-  type: ToastType;
-  duration?: number;
-}
+import toast from "react-hot-toast";
 
 export const useToast = () => {
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const showSuccess = (message: string, options = {}) => {
+    toast.success(message, {
+      duration: 4000,
+      position: "top-right",
+      style: {
+        background: "#10b981",
+        color: "#fff",
+      },
+      ...options,
+    });
+  };
 
-  const addToast = useCallback((message: string, type: ToastType, duration?: number) => {
-    const id = `toast-${Date.now()}-${Math.random()}`;
-    const newToast: ToastItem = {
-      id,
-      message,
-      type,
-      duration
-    };
+  const showError = (message: string, options = {}) => {
+    toast.error(message, {
+      duration: 4000,
+      position: "top-right",
+      style: {
+        background: "#ef4444",
+        color: "#fff",
+      },
+      ...options,
+    });
+  };
 
-    setToasts(prev => [...prev, newToast]);
-    return id;
-  }, []);
+  const showPromise = (promise:Promise<any>, messages: any, options = {}) => {
+    return toast.promise(
+      promise,
+      {
+        loading: messages.loading || 'טוען...',
+        success: messages.success || 'בוצע בהצלחה!',
+        error: messages.error || 'אירעה שגיאה',
+      },
+      {
+        style: {
+          minWidth: '250px',
+        },
+        success: {
+          duration: 4000,
+          icon: '🎉',
+        },
+        error: {
+          duration: 4000,
+          icon: '❌',
+        },
+        ...options
+      }
+    );
+  };
 
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+  const showLoading = (message: string) => {
+    return toast.loading(message);
+  };
 
-  const error = useCallback((message: string, duration?: number) => {
-    return addToast(message, 'error', duration);
-  }, [addToast]);
+  const dismissToast = (toastId: string) => {
+    toast.dismiss(toastId);
+  };
 
-  const warning = useCallback((message: string, duration?: number) => {
-    return addToast(message, 'warning', duration);
-  }, [addToast]);
-
-  const info = useCallback((message: string, duration?: number) => {
-    return addToast(message, 'info', duration);
-  }, [addToast]);
-
-  const clear = useCallback(() => {
-    setToasts([]);
-  }, []);
+  const dismissAll = () => {
+    toast.dismiss();
+  };
 
   return {
-    toasts,
-    addToast,
-    removeToast,
-    error,
-    warning,
-    info,
-    clear
+    showSuccess,
+    showError,
+    showPromise,
+    showLoading,
+    dismissToast,
+    dismissAll,
   };
 };

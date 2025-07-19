@@ -20,7 +20,7 @@ namespace FlightBoard.Infrastructure.Repositories
 
         public async Task<IEnumerable<Flight>> GetAllAsync()
         {
-            _logger.LogDebug("Retrieving all flights from database");
+            _logger.LogInformation("Retrieving all flights from database");
             return await _context.Flights
                 .OrderBy(f => f.DepartureTime)
                 .ToListAsync();
@@ -28,20 +28,20 @@ namespace FlightBoard.Infrastructure.Repositories
 
         public async Task<Flight?> GetByIdAsync(int id)
         {
-            _logger.LogDebug("Retrieving flight with ID: {FlightId}", id);
+            _logger.LogInformation("Retrieving flight with ID: {FlightId}", id);
             return await _context.Flights.FindAsync(id);
         }
 
         public async Task<Flight?> GetByFlightNumberAsync(string flightNumber)
         {
-            _logger.LogDebug("Retrieving flight with number: {FlightNumber}", flightNumber);
+            _logger.LogInformation("Retrieving flight with number: {FlightNumber}", flightNumber);
             return await _context.Flights
                 .FirstOrDefaultAsync(f => f.FlightNumber == flightNumber);
         }
 
         public async Task<IEnumerable<Flight>> SearchAsync(string? status = null, string? destination = null)
         {
-            _logger.LogDebug("Searching flights with status: {Status}, destination: {Destination}", status, destination);
+            _logger.LogInformation("Searching flights with status: {Status}, destination: {Destination}", status, destination);
 
             var query = _context.Flights.AsQueryable();
 
@@ -63,7 +63,7 @@ namespace FlightBoard.Infrastructure.Repositories
 
         public async Task<Flight> AddAsync(Flight flight)
         {
-            _logger.LogDebug("Adding new flight: {FlightNumber}", flight.FlightNumber);
+            _logger.LogInformation("Adding new flight: {FlightNumber}", flight.FlightNumber);
 
             flight.CreatedAt = DateTime.Now;
             flight.UpdatedAt = DateTime.Now;
@@ -76,7 +76,7 @@ namespace FlightBoard.Infrastructure.Repositories
 
         public async Task<bool> DeleteAsync(int id)
         {
-            _logger.LogDebug("Deleting flight with ID: {FlightId}", id);
+            _logger.LogInformation("Deleting flight with ID: {FlightId}", id);
 
             var flight = await _context.Flights.FindAsync(id);
             if (flight == null)
@@ -92,7 +92,7 @@ namespace FlightBoard.Infrastructure.Repositories
 
         public async Task<bool> FlightNumberExistsAsync(string flightNumber, int? excludeId = null)
         {
-            _logger.LogDebug("Checking if flight number exists: {FlightNumber}", flightNumber);
+            _logger.LogInformation("Checking if flight number exists: {FlightNumber}", flightNumber);
 
             var query = _context.Flights.Where(f => f.FlightNumber == flightNumber);
 

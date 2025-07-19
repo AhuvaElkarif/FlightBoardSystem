@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Button } from "../ui/button/Button.component";
+import { Button } from "../ui/forms/button/Button.component";
 
 export const Container = styled.div`
   min-height: 100vh;

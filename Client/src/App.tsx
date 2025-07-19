@@ -8,8 +8,8 @@ const App: React.FC = () => {
   return (
     <AppProviders>
       <Router>
+        <Toaster position="top-right" />
         <SignalRWrapper />
-        <Toaster />
         <AppRoutes />
       </Router>
     </AppProviders>

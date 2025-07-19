@@ -1,7 +1,7 @@
 import React from 'react';
 import { type FieldError, type UseFormRegister } from 'react-hook-form';
 import type { CreateFlightRequest } from '../../types/types';
-import { Input } from '../ui/Input.styled';
+import { Input } from '../ui/forms/Input.styled';
 import { ErrorMessage, FormField as StyledFormField, Label } from './CreateFlight.styled';
 
 interface FormFieldProps {

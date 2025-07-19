@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Flight } from "../types/types";
-import { addFlightToCache, removeFlightFromCache } from "../utils/cacheUtils";
-import { API_ENDPOINTS } from "../utils/constants";
+import type { Flight } from "../../types/types";
+import { addFlightToCache, removeFlightFromCache } from "../../utils/cacheUtils";
+import { API_ENDPOINTS } from "../../utils/constants";
 
 export const useSignalR = () => {
   const connectionRef = useRef<HubConnection | null>(null);
@@ -24,10 +24,12 @@ export const useSignalR = () => {
         console.log("SignalR Connected");
 
         connection.on("FlightAdded", (flight: Flight) => {
+          console.log("Flight Added:", flight);
           addFlightToCache(queryClient, flight);
         });
 
         connection.on("FlightDeleted", (flightId: string) => {
+          console.log("Flight Deleted:", flightId);
           removeFlightFromCache(queryClient, flightId);
         });
       } catch (error) {
