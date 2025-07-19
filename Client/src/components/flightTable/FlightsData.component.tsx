@@ -7,12 +7,17 @@ import {
 } from "../flightsBoard/FlightsBoard.styled";
 import { FlightFiltersCard } from "./FlightFilters.component";
 import { FlightTable } from "./FlightTable.component";
+import { useEffect, useState } from "react";
+import type { Flight } from "../../types/types";
 
 export const FlightData: React.FC = () => {
   const { filters } = useAppSelector((state) => state.filters);
   const { flights, isLoading, error, deleteFlightAsync, isDeleting } =
     useFlights(filters);
-
+  const [flightsData, setFlightsData] = useState<Flight[]>(flights);
+  useEffect(() => {
+    setFlightsData(flights);  
+  }, [flights]);
   return (
     <Container>
       <DataTitle>Flight Management</DataTitle>
@@ -28,7 +33,8 @@ export const FlightData: React.FC = () => {
           </ErrorMessageBoard>
         ) : (
           <FlightTable
-            flights={flights}
+          setFlights={setFlightsData}
+            flights={flightsData}
             deleteFlight={deleteFlightAsync}
             isDeleting={isDeleting}
           />

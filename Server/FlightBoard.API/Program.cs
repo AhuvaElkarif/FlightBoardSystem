@@ -2,16 +2,15 @@ using FlightBoard.Application;
 using FlightBoard.Infrastructure;
 using FlightBoard.Infrastructure.Data;
 using FlightBoard.Infrastructure.Hubs;
-//using Serilog;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
-//Log.Logger = new LoggerConfiguration()
-//    .ReadFrom.Configuration(builder.Configuration)
-//    .CreateLogger();
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration);
+});
 
-//builder.Host.UseSerilog();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

@@ -15,11 +15,13 @@ import { useToast } from "../../hooks/ui/useToast";
 interface FlightTableProps {
   flights: Flight[];
   deleteFlight: (id: string) => Promise<string>;
+  setFlights: React.Dispatch<React.SetStateAction<Flight[]>>;
   isDeleting?: boolean;
 }
 
 export const FlightTable: React.FC<FlightTableProps> = ({
   flights,
+  setFlights,
   deleteFlight,
   isDeleting,
 }) => {
@@ -33,11 +35,20 @@ export const FlightTable: React.FC<FlightTableProps> = ({
       if (!confirmed) {
         return;
       }
-      showPromise(deleteFlight(id), {
-        loading: "Deleting flight...",
-        success: "Flight deleted successfully!",
-        error: "Failed to delete flight",
-      });
+      try {
+        setFlights((prevFlights) => prevFlights.filter((f) => f.id !== id));
+        showPromise(deleteFlight(id), {
+          loading: "Deleting flight...",
+          success: "Flight deleted successfully!",
+          error: "Failed to delete flight",
+        });
+      } catch (error) {
+        const deletedFlight = flights.find((flight) => flight.id === id);
+        if (deletedFlight) {
+          setFlights((prevFlights) => [...prevFlights, deletedFlight]);
+        }
+        console.error("Failed to delete flight:", error);
+      }
     },
     [deleteFlight, showPromise]
   );
