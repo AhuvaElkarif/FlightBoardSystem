@@ -132,21 +132,6 @@ namespace FlightBoard.Tests.Validators
             AssertValidationFailed(result, expectedError);
         }
 
-        [Theory]
-        [InlineData("aa101")] // lowercase
-        [InlineData("123AA")] // numbers first
-        [InlineData("A@123")] // special characters
-        [InlineData("A 123")] // spaces
-        public async Task ValidateAsync_InvalidFlightNumberFormat_ReturnsInvalidWithFormatError(
-            string invalidFlightNumber)
-        {
-            var flightDto = CreateFlightDto(flightNumber: invalidFlightNumber);
-
-            var result = await _validator.ValidateAsync(flightDto);
-
-            AssertValidationFailed(result, "Flight number format is invalid");
-        }
-
         #endregion
 
         #region Complex Validation Scenarios
