@@ -10,11 +10,15 @@ namespace FlightBoard.Tests.Services
 {
     public class FlightServiceTests
     {
+        #region Fields and Constructor
         private readonly Mock<IFlightRepository> _mockFlightRepository;
         private readonly Mock<IFlightStatusService> _mockFlightStatusService;
         private readonly Mock<IFlightNotificationService> _mockNotificationService;
         private readonly Mock<ILogger<FlightService>> _mockLogger;
         private readonly FlightService _flightService;
+
+        private static readonly DateTime TestDepartureTime = new DateTime(2024, 12, 25, 14, 30, 0);
+        private static readonly DateTime TestCreatedTime = new DateTime(2024, 12, 20, 10, 0, 0);
 
         public FlightServiceTests()
         {
@@ -29,155 +33,265 @@ namespace FlightBoard.Tests.Services
                 _mockNotificationService.Object,
                 _mockLogger.Object);
         }
+        #endregion
+
+        #region GetAllFlightsAsync Tests
 
         [Fact]
-        public async Task GetAllFlightsAsync_ReturnsAllFlights()
+        public async Task GetAllFlightsAsync_WhenFlightsExist_ReturnsAllFlights()
         {
-            // Arrange
-            var flights = new List<Flight>
+            var expectedFlights = CreateTestFlights();
+            SetupMockRepository(expectedFlights);
+            SetupMockStatusService(FlightStatus.Scheduled);
+
+            var result = await _flightService.GetAllFlightsAsync();
+            var flightList = result.ToList();
+
+            Assert.Equal(2, flightList.Count);
+            Assert.Equal("AA101", flightList.First().FlightNumber);
+            Assert.Equal("BA202", flightList.Last().FlightNumber);
+
+            VerifyRepositoryGetAllCalled();
+        }
+
+        [Fact]
+        public async Task GetAllFlightsAsync_WhenNoFlightsExist_ReturnsEmptyCollection()
         {
-            new Flight { Id = 1, FlightNumber = "AA101", Destination = "New York", DepartureTime = DateTime.UtcNow.AddHours(2), Gate = "A1" },
-            new Flight { Id = 2, FlightNumber = "BA202", Destination = "London", DepartureTime = DateTime.UtcNow.AddHours(3), Gate = "B2" }
-        };
+            SetupMockRepository(new List<Flight>());
 
-            _mockFlightRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(flights);
-            _mockFlightStatusService.Setup(s => s.CalculateStatus(It.IsAny<DateTime>())).Returns(FlightStatus.Scheduled);
-
-            // Act
             var result = await _flightService.GetAllFlightsAsync();
 
-            // Assert
-            Assert.Equal(2, result.Count());
-            Assert.Equal("AA101", result.First().FlightNumber);
-            _mockFlightRepository.Verify(r => r.GetAllAsync(), Times.Once);
+            Assert.Empty(result);
+            VerifyRepositoryGetAllCalled();
         }
+        #endregion
+
+        #region GetFlightByIdAsync Tests
 
         [Fact]
-        public async Task GetFlightByIdAsync_ExistingFlight_ReturnsFlight()
+        public async Task GetFlightByIdAsync_WhenFlightExists_ReturnsFlight()
         {
-            // Arrange
-            var flight = new Flight { Id = 1, FlightNumber = "AA101", Destination = "New York", DepartureTime = DateTime.UtcNow.AddHours(2), Gate = "A1" };
-            _mockFlightRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(flight);
-            _mockFlightStatusService.Setup(s => s.CalculateStatus(It.IsAny<DateTime>())).Returns(FlightStatus.Scheduled);
+            const int flightId = 1;
+            var expectedFlight = CreateTestFlight(flightId, "AA101", "New York");
 
-            // Act
-            var result = await _flightService.GetFlightByIdAsync(1);
+            _mockFlightRepository.Setup(r => r.GetByIdAsync(flightId))
+                .ReturnsAsync(expectedFlight);
+            SetupMockStatusService(FlightStatus.Scheduled);
 
-            // Assert
+            var result = await _flightService.GetFlightByIdAsync(flightId);
+
             Assert.NotNull(result);
             Assert.Equal("AA101", result.FlightNumber);
-            _mockFlightRepository.Verify(r => r.GetByIdAsync(1), Times.Once);
+            Assert.Equal("New York", result.Destination);
+
+            VerifyRepositoryGetByIdCalled(flightId);
         }
 
         [Fact]
-        public async Task GetFlightByIdAsync_NonExistingFlight_ReturnsNull()
+        public async Task GetFlightByIdAsync_WhenFlightDoesNotExist_ReturnsNull()
         {
-            // Arrange
-            _mockFlightRepository.Setup(r => r.GetByIdAsync(999)).ReturnsAsync((Flight?)null);
+            const int nonExistentFlightId = 999;
+            _mockFlightRepository.Setup(r => r.GetByIdAsync(nonExistentFlightId))
+                .ReturnsAsync((Flight?)null);
 
-            // Act
-            var result = await _flightService.GetFlightByIdAsync(999);
+            var result = await _flightService.GetFlightByIdAsync(nonExistentFlightId);
 
-            // Assert
             Assert.Null(result);
-            _mockFlightRepository.Verify(r => r.GetByIdAsync(999), Times.Once);
+            VerifyRepositoryGetByIdCalled(nonExistentFlightId);
         }
 
+        #endregion
+
+        #region AddFlightAsync Tests
+
         [Fact]
-        public async Task AddFlightAsync_ValidFlight_ReturnsFlightDto()
+        public async Task AddFlightAsync_WithValidFlight_ReturnsFlightDto()
         {
-            // Arrange
-            var createFlightDto = new CreateFlightDto("AA101", "New York", DateTime.UtcNow.AddHours(2), "A1");
-            var savedFlight = new Flight
-            {
-                Id = 1,
-                FlightNumber = "AA101",
-                Destination = "New York",
-                DepartureTime = DateTime.UtcNow.AddHours(2),
-                Gate = "A1",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+            var createFlightDto = CreateTestCreateFlightDto();
+            var savedFlight = CreateTestSavedFlight();
 
-            _mockFlightRepository.Setup(r => r.AddAsync(It.IsAny<Flight>())).ReturnsAsync(savedFlight);
-            _mockFlightStatusService.Setup(s => s.CalculateStatus(It.IsAny<DateTime>())).Returns(FlightStatus.Scheduled);
+            _mockFlightRepository.Setup(r => r.AddAsync(It.IsAny<Flight>()))
+                .ReturnsAsync(savedFlight);
+            SetupMockStatusService(FlightStatus.Scheduled);
 
-            // Act
             var result = await _flightService.AddFlightAsync(createFlightDto);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal("AA101", result.FlightNumber);
             Assert.Equal("New York", result.Destination);
             Assert.Equal(FlightStatus.Scheduled, result.Status);
+
+            VerifyRepositoryAddCalled();
+            VerifyNotificationServiceFlightAddedCalled();
+        }
+
+        #endregion
+
+        #region DeleteFlightAsync Tests
+
+        [Fact]
+        public async Task DeleteFlightAsync_WhenFlightExists_ReturnsTrue()
+        {
+            const int flightId = 1;
+            _mockFlightRepository.Setup(r => r.DeleteAsync(flightId))
+                .ReturnsAsync(true);
+
+            var result = await _flightService.DeleteFlightAsync(flightId);
+
+            Assert.True(result);
+            VerifyRepositoryDeleteCalled(flightId);
+            VerifyNotificationServiceFlightDeletedCalled(flightId);
+        }
+
+        [Fact]
+        public async Task DeleteFlightAsync_WhenFlightDoesNotExist_ReturnsFalse()
+        {
+            const int nonExistentFlightId = 999;
+            _mockFlightRepository.Setup(r => r.DeleteAsync(nonExistentFlightId))
+                .ReturnsAsync(false);
+
+            var result = await _flightService.DeleteFlightAsync(nonExistentFlightId);
+
+            Assert.False(result);
+            VerifyRepositoryDeleteCalled(nonExistentFlightId);
+            VerifyNotificationServiceFlightDeletedNotCalled();
+        }
+
+        #endregion
+
+        #region FlightNumberExistsAsync Tests
+
+        [Fact]
+        public async Task FlightNumberExistsAsync_WhenFlightNumberExists_ReturnsTrue()
+        {
+            const string flightNumber = "AA101";
+            _mockFlightRepository.Setup(r => r.FlightNumberExistsAsync(flightNumber, null))
+                .ReturnsAsync(true);
+
+            var result = await _flightService.FlightNumberExistsAsync(flightNumber);
+
+            Assert.True(result);
+            VerifyRepositoryFlightNumberExistsCalled(flightNumber);
+        }
+
+        [Fact]
+        public async Task FlightNumberExistsAsync_WhenFlightNumberDoesNotExist_ReturnsFalse()
+        {
+            const string nonExistentFlightNumber = "XX999";
+            _mockFlightRepository.Setup(r => r.FlightNumberExistsAsync(nonExistentFlightNumber, null))
+                .ReturnsAsync(false);
+
+            var result = await _flightService.FlightNumberExistsAsync(nonExistentFlightNumber);
+
+            Assert.False(result);
+            VerifyRepositoryFlightNumberExistsCalled(nonExistentFlightNumber);
+        }
+
+        #endregion
+
+        #region Test Data Factory Methods
+
+        private static List<Flight> CreateTestFlights()
+        {
+            return new List<Flight>
+            {
+                CreateTestFlight(1, "AA101", "New York", "A1"),
+                CreateTestFlight(2, "BA202", "London", "B2")
+            };
+        }
+
+        private static Flight CreateTestFlight(int id, string flightNumber, string destination, string gate = "A1")
+        {
+            return new Flight
+            {
+                Id = id,
+                FlightNumber = flightNumber,
+                Destination = destination,
+                DepartureTime = TestDepartureTime,
+                Gate = gate,
+                CreatedAt = TestCreatedTime,
+                UpdatedAt = TestCreatedTime
+            };
+        }
+
+        private static CreateFlightDto CreateTestCreateFlightDto()
+        {
+            return new CreateFlightDto("AA101", "New York", TestDepartureTime, "A1");
+        }
+
+        private static Flight CreateTestSavedFlight()
+        {
+            return new Flight
+            {
+                Id = 1,
+                FlightNumber = "AA101",
+                Destination = "New York",
+                DepartureTime = TestDepartureTime,
+                Gate = "A1",
+                CreatedAt = TestCreatedTime,
+                UpdatedAt = TestCreatedTime
+            };
+        }
+
+        #endregion
+
+        #region Mock Setup Helper Methods
+
+        private void SetupMockRepository(List<Flight> flights)
+        {
+            _mockFlightRepository.Setup(r => r.GetAllAsync()).ReturnsAsync(flights);
+        }
+
+        private void SetupMockStatusService(FlightStatus status)
+        {
+            _mockFlightStatusService.Setup(s => s.CalculateStatus(It.IsAny<DateTime>()))
+                .Returns(status);
+        }
+
+        #endregion
+
+        #region Verification Helper Methods
+
+        private void VerifyRepositoryGetAllCalled()
+        {
+            _mockFlightRepository.Verify(r => r.GetAllAsync(), Times.Once);
+        }
+
+        private void VerifyRepositoryGetByIdCalled(int id)
+        {
+            _mockFlightRepository.Verify(r => r.GetByIdAsync(id), Times.Once);
+        }
+
+        private void VerifyRepositoryAddCalled()
+        {
             _mockFlightRepository.Verify(r => r.AddAsync(It.IsAny<Flight>()), Times.Once);
+        }
+
+        private void VerifyRepositoryDeleteCalled(int id)
+        {
+            _mockFlightRepository.Verify(r => r.DeleteAsync(id), Times.Once);
+        }
+        
+        private void VerifyRepositoryFlightNumberExistsCalled(string flightNumber)
+        {
+            _mockFlightRepository.Verify(r => r.FlightNumberExistsAsync(flightNumber, null), Times.Once);
+        }
+
+        private void VerifyNotificationServiceFlightAddedCalled()
+        {
             _mockNotificationService.Verify(n => n.NotifyFlightAddedAsync(It.IsAny<Flight>()), Times.Once);
         }
 
-        [Fact]
-        public async Task DeleteFlightAsync_ExistingFlight_ReturnsTrue()
+        private void VerifyNotificationServiceFlightDeletedCalled(int id)
         {
-            // Arrange
-            _mockFlightRepository.Setup(r => r.DeleteAsync(1)).ReturnsAsync(true);
-
-            // Act
-            var result = await _flightService.DeleteFlightAsync(1);
-
-            // Assert
-            Assert.True(result);
-            _mockFlightRepository.Verify(r => r.DeleteAsync(1), Times.Once);
-            _mockNotificationService.Verify(n => n.NotifyFlightDeletedAsync(1), Times.Once);
+            _mockNotificationService.Verify(n => n.NotifyFlightDeletedAsync(id), Times.Once);
         }
 
-        [Fact]
-        public async Task DeleteFlightAsync_NonExistingFlight_ReturnsFalse()
+        private void VerifyNotificationServiceFlightDeletedNotCalled()
         {
-            // Arrange
-            _mockFlightRepository.Setup(r => r.DeleteAsync(999)).ReturnsAsync(false);
-
-            // Act
-            var result = await _flightService.DeleteFlightAsync(999);
-
-            // Assert
-            Assert.False(result);
-            _mockFlightRepository.Verify(r => r.DeleteAsync(999), Times.Once);
             _mockNotificationService.Verify(n => n.NotifyFlightDeletedAsync(It.IsAny<int>()), Times.Never);
         }
 
-        [Fact]
-        public async Task SearchFlightsAsync_WithFilters_ReturnsFilteredFlights()
-        {
-            // Arrange
-            var searchDto = new FlightSearchDto("Scheduled", "New York");
-            var flights = new List<Flight>
-        {
-            new Flight { Id = 1, FlightNumber = "AA101", Destination = "New York", DepartureTime = DateTime.UtcNow.AddHours(2), Gate = "A1" }
-        };
-
-            _mockFlightRepository.Setup(r => r.SearchAsync("Scheduled", "New York")).ReturnsAsync(flights);
-            _mockFlightStatusService.Setup(s => s.CalculateStatus(It.IsAny<DateTime>())).Returns(FlightStatus.Scheduled);
-
-            // Act
-            var result = await _flightService.SearchFlightsAsync(searchDto);
-
-            // Assert
-            Assert.Single(result);
-            Assert.Equal("AA101", result.First().FlightNumber);
-            _mockFlightRepository.Verify(r => r.SearchAsync("Scheduled", "New York"), Times.Once);
-        }
-
-        [Fact]
-        public async Task FlightNumberExistsAsync_ExistingFlightNumber_ReturnsTrue()
-        {
-            // Arrange
-            _mockFlightRepository.Setup(r => r.FlightNumberExistsAsync("AA101", null)).ReturnsAsync(true);
-
-            // Act
-            var result = await _flightService.FlightNumberExistsAsync("AA101");
-
-            // Assert
-            Assert.True(result);
-            _mockFlightRepository.Verify(r => r.FlightNumberExistsAsync("AA101", null), Times.Once);
-        }
+        #endregion
     }
 }

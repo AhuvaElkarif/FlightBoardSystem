@@ -1,4 +1,4 @@
-using FlightBoard.Application;
+﻿using FlightBoard.Application;
 using FlightBoard.Infrastructure;
 using FlightBoard.Infrastructure.Data;
 using FlightBoard.Infrastructure.Hubs;
@@ -21,11 +21,14 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                    ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -37,6 +40,9 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+PrintStartupBanner(logger, app.Environment);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -45,17 +51,30 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll");
+app.UseCors();
 
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<FlightBoardHub>("/flightBoardhub");
 
+logger.LogInformation("Initializing database...");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<FlightBoardDbContext>();
     context.Database.EnsureCreated();
+    logger.LogInformation("Database initialized successfully");
 }
 
 app.Run();
+
+static void PrintStartupBanner(ILogger<Program> logger, IWebHostEnvironment environment)
+{
+    logger.LogInformation("╔══════════════════════════════════════╗");
+    logger.LogInformation("║            FlightBoard API           ║");
+    logger.LogInformation("║        Flight Management System      ║");
+    logger.LogInformation("╚══════════════════════════════════════╝");
+    logger.LogInformation("Environment: {Environment}", environment.EnvironmentName);
+    logger.LogInformation("Started at: {StartTime}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+    logger.LogInformation("Logs directory: logs/");
+}

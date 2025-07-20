@@ -17,6 +17,7 @@ namespace FlightBoard.Infrastructure
 
             services.AddScoped<IFlightRepository, FlightRepository>();
             services.AddScoped<IFlightNotificationService, FlightNotificationService>();
+            services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
             services.AddSignalR();
 

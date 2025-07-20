@@ -22,6 +22,7 @@ namespace FlightBoard.Infrastructure.Repositories
         {
             _logger.LogInformation("Retrieving all flights from database");
             return await _context.Flights
+                .AsNoTracking()
                 .OrderBy(f => f.DepartureTime)
                 .ToListAsync();
         }
@@ -29,20 +30,19 @@ namespace FlightBoard.Infrastructure.Repositories
         public async Task<Flight?> GetByIdAsync(int id)
         {
             _logger.LogInformation("Retrieving flight with ID: {FlightId}", id);
-            return await _context.Flights.FindAsync(id);
+            return await _context.Flights.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id);
         }
 
         public async Task<Flight?> GetByFlightNumberAsync(string flightNumber)
         {
             _logger.LogInformation("Retrieving flight with number: {FlightNumber}", flightNumber);
             return await _context.Flights
+                .AsNoTracking()
                 .FirstOrDefaultAsync(f => f.FlightNumber == flightNumber);
         }
 
-        public async Task<IEnumerable<Flight>> SearchAsync(string? status = null, string? destination = null)
+        public async Task<IEnumerable<Flight>> SearchAsync(string? destination = null)
         {
-            _logger.LogInformation("Searching flights with status: {Status}, destination: {Destination}", status, destination);
-
             var query = _context.Flights.AsQueryable();
 
             if (!string.IsNullOrEmpty(destination))
@@ -50,15 +50,7 @@ namespace FlightBoard.Infrastructure.Repositories
                 query = query.Where(f => f.Destination.ToLower().Contains(destination.ToLower().Trim()));
             }
 
-            var flights = await query.OrderBy(f => f.DepartureTime).ToListAsync();
-
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<FlightStatus>(status, true, out var statusEnum))
-            {
-                var currentTime = DateTime.Now;
-                flights = flights.Where(f => CalculateFlightStatus(f.DepartureTime, currentTime) == statusEnum).ToList();
-            }
-
-            return flights;
+            return await query.OrderBy(f => f.DepartureTime).ToListAsync();
         }
 
         public async Task<Flight> AddAsync(Flight flight)
@@ -102,28 +94,6 @@ namespace FlightBoard.Infrastructure.Repositories
             }
 
             return await query.AnyAsync();
-        }
-
-        private static FlightStatus CalculateFlightStatus(DateTime departureTime, DateTime currentTime)
-        {
-            var timeDifference = departureTime - currentTime;
-
-            if (timeDifference.TotalMinutes > 30)
-            {
-                return FlightStatus.Scheduled;
-            }
-
-            if (timeDifference.TotalMinutes > 0)
-            {
-                return FlightStatus.Boarding;
-            }
-
-            if (Math.Abs(timeDifference.TotalMinutes) <= 60)
-            {
-                return FlightStatus.Departed;
-            }
-
-            return FlightStatus.Landed;
         }
     }
 }

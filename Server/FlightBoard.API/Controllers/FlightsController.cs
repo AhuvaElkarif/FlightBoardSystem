@@ -32,6 +32,7 @@ namespace FlightBoard.API.Controllers
             try
             {
                 var flights = await _flightService.GetAllFlightsAsync();
+                _logger.LogInformation("Successfully retrieved {FlightCount} flights", flights.Count());
                 return Ok(flights);
             }
             catch (Exception ex)
@@ -47,10 +48,14 @@ namespace FlightBoard.API.Controllers
             try
             {
                 var flight = await _flightService.GetFlightByIdAsync(id);
+
                 if (flight == null)
                 {
+                    _logger.LogWarning("Flight with ID {FlightId} not found", id);
                     return NotFound($"Flight with ID {id} not found");
                 }
+
+                _logger.LogInformation("Successfully retrieved flight {FlightId}", id);
                 return Ok(flight);
             }
             catch (Exception ex)
@@ -70,10 +75,14 @@ namespace FlightBoard.API.Controllers
 
                 if (!validationResult.IsValid)
                 {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage);
+                    _logger.LogWarning("Validation failed for flight search: {ValidationErrors}",
+                        string.Join(", ", errors));
                     return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
                 }
 
                 var flights = await _flightService.SearchFlightsAsync(searchDto);
+                _logger.LogInformation("Flight search returned {FlightCount} results", flights.Count());
                 return Ok(flights);
             }
             catch (Exception ex)
@@ -92,10 +101,14 @@ namespace FlightBoard.API.Controllers
 
                 if (!validationResult.IsValid)
                 {
+                    var errors = validationResult.Errors.Select(e => e.ErrorMessage);
+                    _logger.LogWarning("Validation failed for flight creation: {ValidationErrors}",
+                        string.Join(", ", errors));
                     return BadRequest(validationResult.Errors.Select(e => e.ErrorMessage));
                 }
 
                 var flight = await _flightService.AddFlightAsync(createFlightDto);
+                _logger.LogInformation("Successfully created flight with ID: {FlightId}", flight.Id);
                 return CreatedAtAction(nameof(GetFlight), new { id = flight.Id }, flight);
             }
             catch (Exception ex)
@@ -113,8 +126,10 @@ namespace FlightBoard.API.Controllers
                 var result = await _flightService.DeleteFlightAsync(id);
                 if (!result)
                 {
+                    _logger.LogWarning("Flight with ID {FlightId} not found for deletion", id);
                     return NotFound($"Flight with ID {id} not found");
                 }
+                _logger.LogInformation("Successfully deleted flight with ID: {FlightId}", id);
                 return NoContent();
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using FlightBoard.Application.Interfaces;
 using FlightBoard.Domain.DTOs;
+using FlightBoard.Domain.Interfaces;
 using FluentValidation;
 
 namespace FlightBoard.Application.Validators
@@ -7,10 +8,12 @@ namespace FlightBoard.Application.Validators
     public class CreateFlightValidator : AbstractValidator<CreateFlightDto>
     {
         private readonly IFlightService _flightService;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public CreateFlightValidator(IFlightService flightService)
+        public CreateFlightValidator(IFlightService flightService, IDateTimeProvider dateTimeProvider)
         {
             _flightService = flightService;
+            _dateTimeProvider = dateTimeProvider;
 
             RuleFor(x => x.FlightNumber)
                 .NotEmpty()
@@ -33,13 +36,13 @@ namespace FlightBoard.Application.Validators
                 .WithMessage("Gate must be between 1 and 10 characters");
 
             RuleFor(x => x.DepartureTime)
-                .GreaterThan(DateTime.Now)
+                .GreaterThan(_dateTimeProvider.Now)
                 .WithMessage("Departure time must be in the future");
         }
 
         private async Task<bool> BeUniqueFlightNumber(string flightNumber, CancellationToken cancellationToken)
         {
-            return !await _flightService.FlightNumberExistsAsync(flightNumber);
+            return !await _flightService.FlightNumberExistsAsync(flightNumber, null);
         }
     }
 }

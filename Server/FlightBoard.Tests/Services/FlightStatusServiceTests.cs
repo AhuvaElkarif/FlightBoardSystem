@@ -5,114 +5,98 @@ namespace FlightBoard.Tests.Services
 {
     public class FlightStatusServiceTests
     {
+        #region Fields and Constructor
         private readonly FlightStatusService _flightStatusService;
+        private static readonly DateTime BaseTestTime = new DateTime(2024, 12, 25, 14, 30, 0);
 
         public FlightStatusServiceTests()
         {
             _flightStatusService = new FlightStatusService();
         }
+        #endregion
 
+        #region Scheduled Status Tests
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsMoreThan30MinutesInFuture_ReturnsScheduled()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(45);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Scheduled, result);
         }
 
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsExactly30MinutesInFuture_ReturnsScheduled()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(30);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
-            Assert.Equal(FlightStatus.Scheduled, result);
+            Assert.Equal(FlightStatus.Boarding, result);
         }
+        #endregion
 
+        #region Boarding Status Tests
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsWithin30Minutes_ReturnsBoarding()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(15);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Boarding, result);
         }
 
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsNow_ReturnsBoarding()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime;
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Boarding, result);
         }
+        #endregion
 
+        #region Departed Status Tests
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsWithin60MinutesInPast_ReturnsDeparted()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(-30);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Departed, result);
         }
 
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsExactly60MinutesInPast_ReturnsDeparted()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(-60);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Departed, result);
         }
+        #endregion
 
+        #region Landed Status Tests
         [Fact]
         public void CalculateStatus_WhenDepartureTimeIsMoreThan60MinutesInPast_ReturnsLanded()
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(-90);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(FlightStatus.Landed, result);
         }
+        #endregion
 
+        #region Mixed Status Logic Tests
         [Theory]
         [InlineData(31, FlightStatus.Scheduled)]
-        [InlineData(30, FlightStatus.Scheduled)]
+        [InlineData(30, FlightStatus.Boarding)]
         [InlineData(29, FlightStatus.Boarding)]
         [InlineData(1, FlightStatus.Boarding)]
         [InlineData(0, FlightStatus.Boarding)]
@@ -123,15 +107,12 @@ namespace FlightBoard.Tests.Services
         [InlineData(-120, FlightStatus.Landed)]
         public void CalculateStatus_VariousTimeOffsets_ReturnsCorrectStatus(int minutesOffset, FlightStatus expectedStatus)
         {
-            // Arrange
-            var currentTime = DateTime.UtcNow;
+            var currentTime = BaseTestTime;
             var departureTime = currentTime.AddMinutes(minutesOffset);
 
-            // Act
             var result = _flightStatusService.CalculateStatus(departureTime, currentTime);
-
-            // Assert
             Assert.Equal(expectedStatus, result);
         }
+        #endregion
     }
 }

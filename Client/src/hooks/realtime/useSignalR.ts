@@ -24,12 +24,10 @@ export const useSignalR = () => {
         console.log("SignalR Connected");
 
         connection.on("FlightAdded", (flight: Flight) => {
-          console.log("Flight Added:", flight);
           addFlightToCache(queryClient, flight);
         });
 
         connection.on("FlightDeleted", (flightId: string) => {
-          console.log("Flight Deleted:", flightId);
           removeFlightFromCache(queryClient, flightId);
         });
       } catch (error) {

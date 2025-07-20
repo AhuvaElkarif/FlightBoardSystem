@@ -5,29 +5,21 @@ namespace FlightBoard.Application.Services
 {
     public class FlightStatusService : IFlightStatusService
     {
-        public FlightStatus CalculateStatus(DateTime departureTime)
-        {
-            return CalculateStatus(departureTime, DateTime.Now);
-        }
+        public FlightStatus CalculateStatus(DateTime departureTime) =>
+            CalculateStatus(departureTime, DateTime.Now);
 
         public FlightStatus CalculateStatus(DateTime departureTime, DateTime currentTime)
         {
-            var timeDifference = departureTime - currentTime;
+            var minutesDifference = (departureTime - currentTime).TotalMinutes;
 
-            if (timeDifference.TotalMinutes > 30)
-            {
+            if (minutesDifference > 30)
                 return FlightStatus.Scheduled;
-            }
 
-            if (timeDifference.TotalMinutes > 0)
-            {
+            if (minutesDifference <= 30 && minutesDifference >= 0)
                 return FlightStatus.Boarding;
-            }
 
-            if (Math.Abs(timeDifference.TotalMinutes) <= 60)
-            {
+            if (minutesDifference < 0 && minutesDifference >= -60)
                 return FlightStatus.Departed;
-            }
 
             return FlightStatus.Landed;
         }

@@ -1,6 +1,7 @@
 ﻿using FlightBoard.Application.Interfaces;
 using FlightBoard.Domain.DTOs;
 using FlightBoard.Domain.Entities;
+using FlightBoard.Domain.Enums;
 using FlightBoard.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -46,12 +47,28 @@ namespace FlightBoard.Application.Services
             _logger.LogInformation("Searching flights with filters - Status: {Status}, Destination: {Destination}",
                 searchDto.Status, searchDto.Destination);
 
-            var flights = await _flightRepository.SearchAsync(searchDto.Status, searchDto.Destination);
-            return flights.Select(MapToDto);
+            var flights = await _flightRepository.SearchAsync(searchDto.Destination);
+            var currentTime = DateTime.Now;
+
+            IEnumerable<Flight> filteredFlights = flights;
+            if (!string.IsNullOrEmpty(searchDto.Status) &&
+                Enum.TryParse<FlightStatus>(searchDto.Status, true, out var statusEnum))
+            {
+                filteredFlights = flights
+                    .Where(f => _flightStatusService.CalculateStatus(f.DepartureTime, currentTime) == statusEnum);
+            }
+
+            return filteredFlights.Select(MapToDto);
         }
 
         public async Task<FlightDto> AddFlightAsync(CreateFlightDto createFlightDto)
         {
+            if (createFlightDto == null)
+            {
+                _logger.LogWarning("Create flight DTO is null");
+                throw new ArgumentNullException(nameof(createFlightDto));
+            }
+
             _logger.LogInformation("Adding new flight: {FlightNumber}", createFlightDto.FlightNumber);
 
             var flight = new Flight

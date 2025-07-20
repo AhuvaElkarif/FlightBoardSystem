@@ -7,7 +7,7 @@ namespace FlightBoard.Domain.Interfaces
         Task<IEnumerable<Flight>> GetAllAsync();
         Task<Flight?> GetByIdAsync(int id);
         Task<Flight?> GetByFlightNumberAsync(string flightNumber);
-        Task<IEnumerable<Flight>> SearchAsync(string? status = null, string? destination = null);
+        Task<IEnumerable<Flight>> SearchAsync(string? destination = null);
         Task<Flight> AddAsync(Flight flight);
         Task<bool> DeleteAsync(int id);
         Task<bool> FlightNumberExistsAsync(string flightNumber, int? excludeId = null);

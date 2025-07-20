@@ -21,41 +21,31 @@ namespace FlightBoard.Infrastructure.Services
 
         public async Task NotifyFlightAddedAsync(Flight flight)
         {
-            _logger.LogInformation("Notifying clients about new flight: {FlightNumber}", flight.FlightNumber);
-
-            await _hubContext.Clients.All.SendAsync("FlightAdded", new
-            {
-                flight.Id,
-                flight.FlightNumber,
-                flight.Destination,
-                flight.DepartureTime,
-                flight.Gate,
-                flight.CreatedAt,
-                flight.UpdatedAt
-            });
+            _logger.LogInformation("Adding flight notification: {FlightNumber}", flight.FlightNumber);
+            await _hubContext.Clients.All.SendAsync("FlightAdded", MapFlight(flight));
         }
 
         public async Task NotifyFlightDeletedAsync(int flightId)
         {
-            _logger.LogInformation("Notifying clients about deleted flight: {FlightId}", flightId);
-
+            _logger.LogInformation("Deleting flight notification: {FlightId}", flightId);
             await _hubContext.Clients.All.SendAsync("FlightDeleted", flightId);
         }
 
         public async Task NotifyFlightUpdatedAsync(Flight flight)
         {
-            _logger.LogInformation("Notifying clients about updated flight: {FlightNumber}", flight.FlightNumber);
-
-            await _hubContext.Clients.All.SendAsync("FlightUpdated", new
-            {
-                flight.Id,
-                flight.FlightNumber,
-                flight.Destination,
-                flight.DepartureTime,
-                flight.Gate,
-                flight.CreatedAt,
-                flight.UpdatedAt
-            });
+            _logger.LogInformation("Updating flight notification: {FlightNumber}", flight.FlightNumber);
+            await _hubContext.Clients.All.SendAsync("FlightUpdated", MapFlight(flight));
         }
+
+        private static object MapFlight(Flight flight) => new
+        {
+            flight.Id,
+            flight.FlightNumber,
+            flight.Destination,
+            flight.DepartureTime,
+            flight.Gate,
+            flight.CreatedAt,
+            flight.UpdatedAt
+        };
     }
 }
